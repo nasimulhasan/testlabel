@@ -4,26 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shipping Label Generator</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- SheetJS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <!-- jsPDF Custom Font -->
+  <script src="https://raw.githubusercontent.com/nasimulhasan/testlabel/main/MangoDream-normal.js"></script>
+  <!-- JSZip -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
+  <!-- FileSaver -->
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
   <style>
     body { padding-top: 2rem; background: #f8f9fa; }
     .hidden { display: none; }
   </style>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- SheetJS for Excel parsing -->
-  <script defer src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <!-- jsPDF UMD bundle -->
-  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <!-- jsPDF Custom Font (raw) -->
-  <script defer src="https://raw.githubusercontent.com/nasimulhasan/testlabel/main/MangoDream-normal.js"></script>
-  <!-- JSZip -->
-  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.0/dist/jszip.min.js"></script>
-  <!-- FileSaver -->
-  <script defer src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <!-- Bootstrap JS Bundle -->
-  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
   <div class="container d-flex justify-content-center">
@@ -46,17 +42,56 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <!-- (Your original instruction content goes here) -->
                   <ol class="ps-3">
-                    <li class="mb-3"><strong>PDF সাইজ:</strong> …</li>
-                    <li class="mb-3"><strong>ইমেজ সাইজ:</strong> …</li>
-                    <li class="mb-3"><strong>এক্সেল:</strong> …</li>
-                    <li class="mb-3"><strong>ফোন:</strong> …</li>
-                    <li class="mb-3"><strong>ইনভয়েস সিলেকশন:</strong> …</li>
-                    <li class="mb-3"><strong>ডাউনলোড:</strong> …</li>
+                    <li class="mb-3">
+                      <strong>PDF সাইজ:</strong>
+                      <ul class="ps-3 mb-0">
+                        <li>
+                          ডিফল্ট:
+                          <code class="text-primary">152.4&nbsp;mm × 101.6&nbsp;mm</code>
+                          (<span class="text-secondary">6″ × 4″</span>)
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="mb-3">
+                      <strong>ইমেজ সাইজ:</strong>
+                      <ul class="ps-3 mb-0">
+                        <li>হেডার: <code class="text-primary">≥900×300px</code> (JPEG/PNG)</li>
+                        <li>ফুটার: <code class="text-primary">≥900×450px</code> (JPEG/PNG)</li>
+                        <li class="text-primary">
+                          হেডার এবং ফুটার স্বয়ংক্রিয়ভাবে লেবেলের পূর্ণ প্রস্থে প্রসারিত হবে। নিশ্চিত করুন যে
+                          <code class="text-primary">paper size</code> অনুযায়ী ছবিগুলো পর্যাপ্ত প্রস্থের এবং সঠিক অনুপাতের।
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="mb-3">
+                      <strong>এক্সেল:</strong>
+                      <ul class="ps-3 mb-0">
+                        <li>এক্সটেনশন: <code class="text-primary">.xls</code>, <code class="text-primary">.xlsx</code> &mdash;
+                          <a href="EXCEL_TEMPLATE_URL" class="text-decoration-underline" target="_blank">ডাউনলোড এক্সেল টেমপ্লেট</a>
+                        </li>
+                        <li>কলাম: <code class="text-primary">Invoice</code>, <code class="text-primary">First Name</code>, <code class="text-primary">Last Name</code>, <code class="text-primary">Phone</code>, <code class="text-primary">Address</code>, <code class="text-primary">Order Total Amount</code></li>
+                      </ul>
+                    </li>
+                    <li class="mb-3">
+                      <strong>ফোন:</strong>
+                      <ul class="ps-3 mb-0">
+                        <li>শুধুমাত্র ১১ সংখ্যার <code class="text-primary">0xxxxxxxxxx</code> ফরম্যাট</li>
+                      </ul>
+                    </li>
+                    <li class="mb-3">
+                      <strong>ইনভয়েস সিলেকশন:</strong>
+                      <ul class="ps-3 mb-0">
+                        <li>Ctrl (Windows) / Cmd (Mac) দিয়ে একাধিক নির্বাচন</li>
+                      </ul>
+                    </li>
                   </ol>
-                  <p class="text-info"><strong>ভিডিও নির্দেশিকা:</strong> <a href="YOUTUBE_URL" target="_blank">টিউটোরিয়াল দেখুন</a></p>
-                  <p class="text-info"><strong>পরামর্শ:</strong> …</p>
+                  <p class="text-primary">
+                    <strong>ভিডিও নির্দেশিকা:</strong>
+                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-decoration-underline">
+                      টিউটোরিয়াল দেখুন
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
@@ -94,194 +129,167 @@
             </div>
           </div>
 
-          <!-- Form Inputs -->
+          <!-- Form -->
           <form id="labelForm">
             <div class="mb-2">
               <label for="headerInput" class="form-label">Header Image</label>
-              <input type="file" id="headerInput" class="form-control" accept="image/*">
+              <input type="file" class="form-control" id="headerInput" accept="image/*">
             </div>
             <div class="mb-2">
               <label for="footerInput" class="form-label">Footer Image</label>
-              <input type="file" id="footerInput" class="form-control" accept="image/*">
+              <input type="file" class="form-control" id="footerInput" accept="image/*">
             </div>
             <div class="mb-2">
               <label for="excelInput" class="form-label">Excel File</label>
-              <input type="file" id="excelInput" class="form-control" accept=".xls,.xlsx">
+              <input type="file" class="form-control" id="excelInput" accept=".xls,.xlsx">
             </div>
             <div id="invoiceSelection" class="mb-2 hidden">
               <label for="invoiceSelect" class="form-label">Select Invoices (optional)</label>
               <select id="invoiceSelect" class="form-select" multiple size="8"></select>
-              <div class="form-text">Hold Ctrl/Cmd to select multiple or leave blank for all.</div>
+              <div class="form-text">Hold Ctrl (Windows) / Cmd (Mac) to select multiple.</div>
             </div>
             <button type="button" id="generateBtn" class="btn btn-primary w-100">Generate Labels</button>
           </form>
           <div id="alertPlaceholder" class="mt-3"></div>
         </div>
       </div>
+
+      <!-- Buy Me a Coffee Accordion -->
+      <div class="accordion mb-4" id="coffeeAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="coffeeHeading">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#coffeeCollapse" aria-expanded="false" aria-controls="coffeeCollapse">
+              Buy me a coffee
+            </button>
+          </h2>
+          <div id="coffeeCollapse" class="accordion-collapse collapse" aria-labelledby="coffeeHeading" data-bs-parent="#coffeeAccordion">
+            <div class="accordion-body text-center">
+              <p>If you enjoy this tool, consider buying me a coffee ☕️</p>
+              <img src="https://cdn.jsdelivr.net/gh/nasimulhasan/label2@master/qr.jpeg" alt="Buy me a coffee" class="img-fluid rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing app…');
+    const { jsPDF } = window.jspdf;
+    let parsedRows = [], invoiceList = [];
 
-    // Toggle custom-size fields
-    const preset = document.getElementById('presetSize');
-    const customFields = document.getElementById('customSizeFields');
-    preset.addEventListener('change', e => {
-      customFields.classList.toggle('d-none', e.target.value !== 'custom');
+    // Toggle custom size fields
+    document.getElementById('presetSize').addEventListener('change', e => {
+      const custom = document.getElementById('customSizeFields');
+      custom.classList.toggle('d-none', e.target.value !== 'custom');
     });
 
-    // Grab jsPDF safely
-    const jspdfGlobal = window.jspdf || (window.jsPDF && { jsPDF: window.jsPDF });
-    if (!jspdfGlobal) {
-      console.error('🚨 jsPDF did not load!');
-      alert('Library error: jsPDF failed to load.');
-      return;
-    }
-    const { jsPDF } = jspdfGlobal;
-
-    let parsedRows = [], invoiceList = [];
     const alertPlaceholder = document.getElementById('alertPlaceholder');
-
-    function showAlert(msg, type = 'danger') {
+    function showAlert(msg, type='danger') {
       const wrap = document.createElement('div');
-      wrap.innerHTML = 
-        `<div class="alert alert-${type} alert-dismissible" role="alert">
-           ${msg}
-           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-         </div>`;
+      wrap.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
       alertPlaceholder.append(wrap);
     }
 
-    // Parse Excel
-    document.getElementById('excelInput').addEventListener('change', async e => {
-      const file = e.target.files[0];
-      if (!file) return;
+    document.getElementById('excelInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0]; if (!file) return;
       try {
         const buff = await readFileAsArrayBuffer(file);
         const wb = XLSX.read(buff, { type: 'array' });
-        let last = {};
-        parsedRows = XLSX.utils
-          .sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' })
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' })
           .map(r => {
-            ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount']
-              .forEach(k => r[k] = r[k] || last[k] || '');
-            last = { ...r };
-            return r;
+            ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount'].forEach(k => r[k] = r[k] || (this.last && this.last[k]) || r[k]);
+            this.last = r; return r;
           });
-        invoiceList = [...new Set(parsedRows.map(r => String(r['Invoice']).trim()))].sort();
-        const sel = document.getElementById('invoiceSelect');
-        sel.innerHTML = '';
+        parsedRows = rows;
+        invoiceList = [...new Set(rows.map(r => String(r['Invoice']).trim()))].sort();
+        const sel = document.getElementById('invoiceSelect'); sel.innerHTML = '';
         invoiceList.forEach(inv => sel.append(new Option(inv, inv)));
         document.getElementById('invoiceSelection').classList.remove('hidden');
-      } catch(err) {
-        showAlert('Error parsing Excel: ' + err.message);
-      }
+      } catch (err) { showAlert('Error parsing Excel: ' + err.message); }
     });
 
-    // Generate PDFs
     document.getElementById('generateBtn').addEventListener('click', async () => {
-      console.log('👉 Generate Labels clicked');
       alertPlaceholder.innerHTML = '';
+      const header = document.getElementById('headerInput').files[0];
+      const footer = document.getElementById('footerInput').files[0];
+      if (!header || !footer) return showAlert('Select both header and footer.');
+      if (!parsedRows.length) return showAlert('Upload and parse Excel first.');
 
-      const headerFile = document.getElementById('headerInput').files[0];
-      const footerFile = document.getElementById('footerInput').files[0];
-      if (!headerFile || !footerFile) {
-        return showAlert('Select both header and footer.');
-      }
-      if (!parsedRows.length) {
-        return showAlert('Upload and parse Excel first.');
-      }
-
-      // Paper size logic
-      let [w, h, unit] = document.getElementById('presetSize').value.split(',');
-      if (w === 'custom') {
+      // Paper size
+      let preset = document.getElementById('presetSize').value;
+      let unit, w, h;
+      if (preset === 'custom') {
         w = parseFloat(document.getElementById('paperWidth').value);
         h = parseFloat(document.getElementById('paperHeight').value);
         unit = document.getElementById('paperUnit').value;
-        if (unit === 'in') { w *= 25.4; h *= 25.4; unit = 'mm'; }
-        if (unit === 'pt') { w *= 0.352778; h *= 0.352778; unit = 'mm'; }
-      } else { w = +w; h = +h; }
+        if (unit === 'in') { w *=25.4; h *=25.4; unit='mm'; }
+        if (unit === 'pt') { w *=0.352778; h *=0.352778; unit='mm'; }
+      } else {
+        [w, h, unit] = preset.split(','); w=+w; h=+h;
+      }
 
-      const headerUrl = await readFileAsDataURL(headerFile);
-      const footerUrl = await readFileAsDataURL(footerFile);
+      const headerUrl = await readFileAsDataURL(header);
+      const footerUrl = await readFileAsDataURL(footer);
       const zip = new JSZip();
 
-      const opts = Array.from(document.getElementById('invoiceSelect')
-                          .selectedOptions).map(o => o.value);
-      const targets = opts.length ? opts : invoiceList;
+      // Targets
+      const opts = Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value);
+      const targets = opts.length? opts: invoiceList;
 
       for (const inv of targets) {
-        const group = parsedRows.filter(r => String(r['Invoice']).trim() === inv);
+        const group = parsedRows.filter(r=>String(r['Invoice']).trim()===inv);
         if (!group.length) continue;
 
-        const doc = new jsPDF({ unit, format: [w, h] });
-        try {
-          doc.addFont('MangoDream-normal.ttf', 'MangoDream', 'normal');
-          doc.setFont('MangoDream', 'normal');
-        } catch (fontErr) {
-          console.warn('⚠️ Custom font load failed:', fontErr);
-        }
+        const doc = new jsPDF({ unit, format:[w,h] });
+        // ─── Custom font injection ───────────────────────────────────────────
+        doc.addFont('MangoDream-normal.ttf', 'MangoDream', 'normal');
+        doc.setFont('MangoDream', 'normal');
+        // ─────────────────────────────────────────────────────────────────────────
         doc.setFontSize(10);
 
-        // Images
-        doc.addImage(headerUrl, 'PNG', 0, 0, w, w * (30 / 101.6));
-        doc.addImage(footerUrl, 'PNG', 0, h - (49 * (h / 101.6)), w, h * (49 / 101.6));
+        doc.addImage(headerUrl,'PNG',0,0,w, w*(30/101.6));
+        doc.addImage(footerUrl,'PNG',0,h-(49* h/101.6),w, h*(49/101.6));
 
-        // Text content…
-        let y = w * (30 / 101.6) + 11;
-        const left = 10;
-        doc.text(`Invoice #: ${inv}`, left, y); y += 7;
-        const name = titleCase(group[0]['First Name'] + ' ' + group[0]['Last Name']);
-        doc.text(`Name: ${name}`, left, y); y += 7;
-        let raw = String(group[0]['Phone']).replace(/\D/g, '');
-        if (raw.startsWith('880')) raw = raw.slice(3);
-        else if (raw.startsWith('0')) raw = raw.slice(1);
-        if (raw.length > 10) raw = raw.slice(-10);
-        doc.text(`Phone: 0${raw}`, left, y); y += 7;
-        const fullAddr = `Address: ${titleCase(group[0]['Address'])}`;
-        const addrLines = doc.splitTextToSize(fullAddr, w - left * 2);
-        doc.text(addrLines, left, y); y += addrLines.length * 7;
-        const notes = group.map(r => r['NOTE'] || '').join(' ').toLowerCase();
-        const total = notes.includes('paid') ? '0' : String(Math.round(group[0]['Order Total Amount']));
-        doc.text(`Total: Tk ${total}`, left, y); y += 7;
-        doc.text('Items:', left, y); y += 7;
-        group.forEach(r => {
-          const item = r['Items'] ? titleCase(r['Items']) : '';
-          const qty  = r['Quantity'] ? ` (${r['Quantity']})` : '';
-          if (item) { doc.text(`- ${item}${qty}`, left, y); y += 7; }
+        let y= (30 * h/101.6)+11;
+        const left=10;
+        doc.text(`Invoice #: ${inv}`, left, y); y+=7;
+        const name = titleCase(group[0]['First Name']+' '+group[0]['Last Name']);
+        doc.text(`Name: ${name}`, left, y); y+=7;
+
+        let d=String(group[0]['Phone']).replace(/\D/g,'');
+        if(d.startsWith('880')) d=d.slice(3); else if(d.startsWith('0')) d=d.slice(1);
+        if(d.length>10) d=d.slice(-10);
+        doc.text(`Phone: 0${d}`, left, y); y+=7;
+
+        const full = `Address: ${titleCase(group[0]['Address'])}`;
+        const lines = doc.splitTextToSize(full, w - (left*2));
+        doc.text(lines, left, y); y += lines.length * 7;
+
+        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase();
+        const total = notes.includes('paid')?'0': String(Math.round(group[0]['Order Total Amount']));
+        doc.text(`Total: Tk ${total}`, left, y); y+=7;
+
+        doc.text('Items:', left, y); y+=7;
+        group.forEach(r=>{
+          const item = r['Items']? titleCase(r['Items']):'';
+          const qty = r['Quantity']? ` (${r['Quantity']})` : '';
+          if(item){ doc.text(`- ${item}${qty}`, left, y); y+=7; }
         });
 
         zip.file(`${inv}.pdf`, doc.output('blob'));
       }
 
-      const blob = await zip.generateAsync({ type: 'blob' });
+      const blob = await zip.generateAsync({type:'blob'});
       saveAs(blob, 'shipping_labels.zip');
     });
 
     // Helpers
-    function readFileAsDataURL(file) {
-      return new Promise(res => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result);
-        reader.readAsDataURL(file);
-      });
-    }
-    function readFileAsArrayBuffer(file) {
-      return new Promise(res => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result);
-        reader.readAsArrayBuffer(file);
-      });
-    }
-    function titleCase(str) {
-      return String(str).toLowerCase()
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
-    }
-  });
+    function readFileAsDataURL(f){return new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f);});}
+    function readFileAsArrayBuffer(f){return new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsArrayBuffer(f);});}
+    function titleCase(s){return s.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');}
   </script>
 </body>
 </html>
