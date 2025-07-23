@@ -32,13 +32,14 @@
           </button>
           <!-- ... your instructions modal here ... -->
 
-          <!-- Paper size controls (unchanged) -->
+          <!-- Paper size controls (updated order) -->
           <div class="mb-3 row">
             <label for="presetSize" class="col-sm-4 col-form-label">Paper Size</label>
             <div class="col-sm-8">
               <select id="presetSize" class="form-select">
-                <option value="152.4,101.6,mm">4×6 in (152.4×101.6 mm)</option>
-                <option value="101.6,152.4,mm">6×4 in (101.6×152.4 mm)</option>
+                <!-- Swap values so label 4×6 uses 4in width × 6in height -->
+                <option value="101.6,152.4,mm">4×6 in (101.6×152.4 mm)</option>
+                <option value="152.4,101.6,mm">6×4 in (152.4×101.6 mm)</option>
                 <option value="210,297,mm">A4 (210×297 mm)</option>
                 <option value="216,279,mm">Letter (216×279 mm)</option>
                 <option value="custom">Custom</option>
@@ -46,7 +47,6 @@
             </div>
           </div>
           <div id="customSizeFields" class="mb-3 row d-none">
-            <!-- custom size inputs unchanged -->
             <div class="col-sm-4">
               <label for="paperWidth" class="form-label">Width</label>
               <input type="number" id="paperWidth" class="form-control" placeholder="Width">
@@ -105,161 +105,67 @@
   <script>
     const { jsPDF } = window.jspdf;
     let parsedRows = [], invoiceList = [];
+    let customFontName = null, customFontData = null;
 
-    // store uploaded font
-    let customFontName = null;
-    let customFontData = null;
-
-    // helpers
     function readFileAsDataURL(file) {
       return new Promise(res => {
-        const rd = new FileReader();
-        rd.onload = () => res(rd.result);
-        rd.readAsDataURL(file);
+        const rd = new FileReader(); rd.onload = ()=>res(rd.result); rd.readAsDataURL(file);
       });
     }
     function readFileAsArrayBuffer(file) {
       return new Promise(res => {
-        const rd = new FileReader();
-        rd.onload = () => res(rd.result);
-        rd.readAsArrayBuffer(file);
+        const rd = new FileReader(); rd.onload = ()=>res(rd.result); rd.readAsArrayBuffer(file);
       });
     }
     function titleCase(s) {
-      return s.toLowerCase().split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+      return s.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
     }
 
-    // toggle custom-size fields
-    document.getElementById('presetSize').addEventListener('change', e => {
-      document.getElementById('customSizeFields')
-        .classList.toggle('d-none', e.target.value !== 'custom');
+    document.getElementById('presetSize').addEventListener('change', e=>{
+      document.getElementById('customSizeFields').classList.toggle('d-none', e.target.value!=='custom');
     });
-
     const alertPlaceholder = document.getElementById('alertPlaceholder');
-    function showAlert(msg, type='danger') {
-      const div = document.createElement('div');
-      div.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
-      alertPlaceholder.append(div);
-    }
+    function showAlert(msg, type='danger'){ const div=document.createElement('div'); div.innerHTML=`<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`; alertPlaceholder.append(div);}    
 
-    // font upload
-    document.getElementById('fontInput').addEventListener('change', async e => {
-      const file = e.target.files[0]; if (!file) return;
-      const dataUrl = await readFileAsDataURL(file);
-      customFontName = file.name;
-      customFontData = dataUrl.split(',')[1];
+    document.getElementById('fontInput').addEventListener('change', async e=>{
+      const file=e.target.files[0]; if(!file)return;
+      const dataUrl=await readFileAsDataURL(file);
+      customFontName=file.name; customFontData=dataUrl.split(',')[1];
     });
 
-    // parse Excel
-    document.getElementById('excelInput').addEventListener('change', async e => {
-      const file = e.target.files[0]; if (!file) return;
-      try {
-        const buff = await readFileAsArrayBuffer(file);
-        const wb   = XLSX.read(buff, { type: 'array' });
-        let last = {};
-        parsedRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' })
-          .map(r => {
-            ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount']
-              .forEach(k => r[k] = r[k] || last[k] || '');
-            last = {...r}; return r;
-          });
-        invoiceList = [...new Set(parsedRows.map(r => String(r['Invoice']).trim()))].sort();
-        const sel = document.getElementById('invoiceSelect'); sel.innerHTML = '';
-        invoiceList.forEach(i => sel.append(new Option(i, i)));
-        document.getElementById('invoiceSelection').classList.remove('hidden');
-      } catch(err) {
-        showAlert('Error parsing Excel: ' + err.message);
-      }
+    document.getElementById('excelInput').addEventListener('change', async e=>{
+      const file=e.target.files[0]; if(!file)return; try{
+        const buff=await readFileAsArrayBuffer(file), wb=XLSX.read(buff,{type:'array'});
+        let last={}; parsedRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).map(r=>{['Invoice','First Name','Last Name','Phone','Address','Order Total Amount'].forEach(k=>r[k]=r[k]||last[k]||''); last={...r};return r;});
+        invoiceList=[...new Set(parsedRows.map(r=>String(r['Invoice']).trim()))].sort(); const sel=document.getElementById('invoiceSelect'); sel.innerHTML=''; invoiceList.forEach(i=>sel.append(new Option(i,i))); document.getElementById('invoiceSelection').classList.remove('hidden');
+      }catch(err){showAlert('Error parsing Excel: '+err.message);}
     });
 
-    // generate labels
-    document.getElementById('generateBtn').addEventListener('click', async () => {
-      alertPlaceholder.innerHTML = '';
-      const header = document.getElementById('headerInput').files[0];
-      const footer = document.getElementById('footerInput').files[0];
-      if (!header || !footer) return showAlert('Select both header and footer.');
-      if (!parsedRows.length)   return showAlert('Upload and parse Excel first.');
+    document.getElementById('generateBtn').addEventListener('click', async ()=>{
+      alertPlaceholder.innerHTML=''; const headerFile=document.getElementById('headerInput').files[0], footerFile=document.getElementById('footerInput').files[0];
+      if(!headerFile||!footerFile) return showAlert('Select both header and footer.');
+      if(!parsedRows.length) return showAlert('Upload and parse Excel first.');
 
-      // paper size
-      let unit, w, h;
-      const preset = document.getElementById('presetSize').value;
-      if (preset === 'custom') {
-        w    = +document.getElementById('paperWidth').value;
-        h    = +document.getElementById('paperHeight').value;
-        unit = document.getElementById('paperUnit').value;
-        if (unit === 'in') { w *= 25.4; h *= 25.4; unit = 'mm'; }
-        if (unit === 'pt') { w *= 0.352778; h *= 0.352778; unit = 'mm'; }
-      } else {
-        [w, h, unit] = preset.split(','); w = +w; h = +h;
-      }
+      let unit,w,h; const preset=document.getElementById('presetSize').value;
+      if(preset==='custom'){ w=+document.getElementById('paperWidth').value; h=+document.getElementById('paperHeight').value; unit=document.getElementById('paperUnit').value; if(unit==='in'){w*=25.4;h*=25.4;unit='mm';} if(unit==='pt'){w*=0.352778;h*=0.352778;unit='mm';} } else {[w,h,unit]=preset.split(',');w=+w;h=+h;}
 
-      const headerUrl = await readFileAsDataURL(header);
-      const footerUrl = await readFileAsDataURL(footer);
-      const zip       = new JSZip();
-      const opts      = Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o => o.value);
-      const targets   = opts.length ? opts : invoiceList;
+      const headerUrl=await readFileAsDataURL(headerFile), footerUrl=await readFileAsDataURL(footerFile), zip=new JSZip();
+      const opts=Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value);
+      const targets=opts.length?opts:invoiceList;
 
-      for (const inv of targets) {
-        const group = parsedRows.filter(r => String(r['Invoice']).trim() === inv);
-        if (!group.length) continue;
-
-        const doc = new jsPDF({ unit, format: [w, h] });
-        doc.setFontSize(10);
-
-        // inject font
-        if (customFontName && customFontData) {
-          doc.addFileToVFS(customFontName, customFontData);
-          doc.addFont(customFontName, 'CustomFont', 'normal');
-          doc.setFont('CustomFont', 'normal');
-        }
-
-        // draw header with preserved aspect ratio
-        const headerProps  = doc.getImageProperties(headerUrl);
-        const headerH      = w * (headerProps.height / headerProps.width);
-        doc.addImage(headerUrl, 'PNG', 0, 0, w, headerH);
-
-        // draw footer with preserved aspect ratio
-        const footerProps  = doc.getImageProperties(footerUrl);
-        const footerH      = w * (footerProps.height / footerProps.width);
-        doc.addImage(footerUrl, 'PNG', 0, h - footerH, w, footerH);
-
-        // start text below header
-        let y = headerH + 11;
-        const left = 10;
-
-        doc.text(`Invoice #: ${inv}`, left, y); y += 7;
-        const name = titleCase(group[0]['First Name'] + ' ' + group[0]['Last Name']);
-        doc.text(`Name: ${name}`, left, y); y += 7;
-
-        let num = String(group[0]['Phone']).replace(/\D/g, '');
-        if (num.startsWith('880')) num = num.slice(3);
-        else if (num.startsWith('0')) num = num.slice(1);
-        if (num.length > 10) num = num.slice(-10);
-        doc.text(`Phone: 0${num}`, left, y); y += 7;
-
-        const addrLines = doc.splitTextToSize(
-          `Address: ${titleCase(group[0]['Address'])}`, w - left * 2
-        );
-        doc.text(addrLines, left, y); y += addrLines.length * 7;
-
-        const notes = group.map(r => r['NOTE'] || '').join(' ').toLowerCase();
-        const total = notes.includes('paid') ? '0' : String(Math.round(group[0]['Order Total Amount']));
-        doc.text(`Total: Tk ${total}`, left, y); y += 7;
-
-        doc.text('Items:', left, y); y += 7;
-        group.forEach(r => {
-          const item = r['Items'] ? titleCase(r['Items']) : '';
-          const qty  = r['Quantity'] ? ` (${r['Quantity']})` : '';
-          if (item) { doc.text(`- ${item}${qty}`, left, y); y += 7; }
-        });
-
-        zip.file(`${inv}.pdf`, doc.output('blob'));
-      }
-
-      const blob = await zip.generateAsync({ type: 'blob' });
-      saveAs(blob, 'shipping_labels.zip');
+      for(const inv of targets){
+        const group=parsedRows.filter(r=>String(r['Invoice']).trim()===inv); if(!group.length) continue;
+        const doc=new jsPDF({unit,format:[w,h]}); doc.setFontSize(10);
+        if(customFontName&&customFontData){doc.addFileToVFS(customFontName,customFontData);doc.addFont(customFontName,'CustomFont','normal');doc.setFont('CustomFont','normal');}
+        const hp=doc.getImageProperties(headerUrl), hh=w*(hp.height/hp.width); doc.addImage(headerUrl,'PNG',0,0,w,hh);
+        const fp=doc.getImageProperties(footerUrl), fh=w*(fp.height/fp.width); doc.addImage(footerUrl,'PNG',0,h-fh,w,fh);
+        let y=hh+11,left=10; doc.text(`Invoice #: ${inv}`,left,y);y+=7; const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']); doc.text(`Name: ${name}`,left,y);y+=7;
+        let num=String(group[0]['Phone']).replace(/\D/g,''); if(num.startsWith('880'))num=num.slice(3);else if(num.startsWith('0'))num=num.slice(1); if(num.length>10)num=num.slice(-10); doc.text(`Phone: 0${num}`,left,y);y+=7;
+        const addrLines=doc.splitTextToSize(`Address: ${titleCase(group[0]['Address'])}`,w-left*2); doc.text(addrLines,left,y);y+=addrLines.length*7;
+        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase(); const total=notes.includes('paid')?'0':String(Math.round(group[0]['Order Total Amount'])); doc.text(`Total: Tk ${total}`,left,y);y+=7;
+        doc.text('Items:',left,y);y+=7; group.forEach(r=>{const item=r['Items']?titleCase(r['Items']):'';const qty=r['Quantity']?` (${r['Quantity']})`:'';if(item){doc.text(`- ${item}${qty}`,left,y);y+=7;}});
+        zip.file(`${inv}.pdf`,doc.output('blob'));}
+      const blob=await zip.generateAsync({type:'blob'}); saveAs(blob,'shipping_labels.zip');
     });
   </script>
 </body>
