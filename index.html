@@ -47,11 +47,27 @@
           </div>
           <div id="customSizeFields" class="mb-3 row d-none">
             <!-- custom size inputs unchanged -->
+            <div class="col-sm-4">
+              <label for="paperWidth" class="form-label">Width</label>
+              <input type="number" id="paperWidth" class="form-control" placeholder="Width">
+            </div>
+            <div class="col-sm-4">
+              <label for="paperHeight" class="form-label">Height</label>
+              <input type="number" id="paperHeight" class="form-control" placeholder="Height">
+            </div>
+            <div class="col-sm-4">
+              <label for="paperUnit" class="form-label">Unit</label>
+              <select id="paperUnit" class="form-select">
+                <option value="mm" selected>mm</option>
+                <option value="in">in</option>
+                <option value="pt">pt</option>
+              </select>
+            </div>
           </div>
 
           <!-- Form Inputs -->
           <form id="labelForm">
-            <!-- NEW: Font upload -->
+            <!-- Font upload -->
             <div class="mb-2">
               <label for="fontInput" class="form-label">Upload Font (TTF/OTF)</label>
               <input type="file" id="fontInput" class="form-control" accept=".ttf,.otf">
@@ -73,7 +89,7 @@
             <div id="invoiceSelection" class="mb-2 hidden">
               <label for="invoiceSelect" class="form-label">Select Invoices (optional)</label>
               <select id="invoiceSelect" class="form-select" multiple size="8"></select>
-              <div class="form-text">Hold Ctrl (Windows) / Cmd (Mac) to select multiple.</div>
+              <div class="form-text">Hold Ctrl (Win) / Cmd (Mac) to select multiple.</div>
             </div>
             <button type="button" id="generateBtn" class="btn btn-primary w-100">Generate Labels</button>
           </form>
@@ -94,7 +110,7 @@
     let customFontName = null;
     let customFontData = null;
 
-    // read helpers
+    // helpers
     function readFileAsDataURL(file) {
       return new Promise(res => {
         const rd = new FileReader();
@@ -111,11 +127,11 @@
     }
     function titleCase(s) {
       return s.toLowerCase().split(' ')
-        .map(w => w[0].toUpperCase() + w.slice(1))
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
     }
 
-    // Toggle custom-size fields
+    // toggle custom-size fields
     document.getElementById('presetSize').addEventListener('change', e => {
       document.getElementById('customSizeFields')
         .classList.toggle('d-none', e.target.value !== 'custom');
@@ -124,41 +140,34 @@
     const alertPlaceholder = document.getElementById('alertPlaceholder');
     function showAlert(msg, type='danger') {
       const div = document.createElement('div');
-      div.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">
-                         ${msg}
-                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                       </div>`;
+      div.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
       alertPlaceholder.append(div);
     }
 
-    // handle font upload
+    // font upload
     document.getElementById('fontInput').addEventListener('change', async e => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       const dataUrl = await readFileAsDataURL(file);
-      customFontName = file.name;                     // e.g. "MyFont.ttf"
-      customFontData = dataUrl.split(',')[1];         // base64 payload
-      console.log('Loaded font:', customFontName);
+      customFontName = file.name;
+      customFontData = dataUrl.split(',')[1];
     });
 
-    // parse Excel (unchanged)
-    document.getElementById('excelInput').addEventListener('change', async (e) => {
+    // parse Excel
+    document.getElementById('excelInput').addEventListener('change', async e => {
       const file = e.target.files[0]; if (!file) return;
       try {
         const buff = await readFileAsArrayBuffer(file);
-        const wb = XLSX.read(buff, { type: 'array' });
+        const wb   = XLSX.read(buff, { type: 'array' });
         let last = {};
         parsedRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' })
           .map(r => {
             ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount']
               .forEach(k => r[k] = r[k] || last[k] || '');
-            last = {...r};
-            return r;
+            last = {...r}; return r;
           });
         invoiceList = [...new Set(parsedRows.map(r => String(r['Invoice']).trim()))].sort();
-        const sel = document.getElementById('invoiceSelect');
-        sel.innerHTML = '';
-        invoiceList.forEach(i=> sel.append(new Option(i,i)));
+        const sel = document.getElementById('invoiceSelect'); sel.innerHTML = '';
+        invoiceList.forEach(i => sel.append(new Option(i, i)));
         document.getElementById('invoiceSelection').classList.remove('hidden');
       } catch(err) {
         showAlert('Error parsing Excel: ' + err.message);
@@ -173,74 +182,83 @@
       if (!header || !footer) return showAlert('Select both header and footer.');
       if (!parsedRows.length)   return showAlert('Upload and parse Excel first.');
 
-      // paper size logic (unchanged)…
+      // paper size
       let unit, w, h;
       const preset = document.getElementById('presetSize').value;
-      if (preset==='custom') {
-        w = +document.getElementById('paperWidth').value;
-        h = +document.getElementById('paperHeight').value;
+      if (preset === 'custom') {
+        w    = +document.getElementById('paperWidth').value;
+        h    = +document.getElementById('paperHeight').value;
         unit = document.getElementById('paperUnit').value;
-        if (unit==='in'){ w*=25.4; h*=25.4; unit='mm'; }
-        if (unit==='pt'){ w*=0.352778; h*=0.352778; unit='mm'; }
+        if (unit === 'in') { w *= 25.4; h *= 25.4; unit = 'mm'; }
+        if (unit === 'pt') { w *= 0.352778; h *= 0.352778; unit = 'mm'; }
       } else {
-        [w,h,unit] = preset.split(','); w=+w; h=+h;
+        [w, h, unit] = preset.split(','); w = +w; h = +h;
       }
 
       const headerUrl = await readFileAsDataURL(header);
       const footerUrl = await readFileAsDataURL(footer);
-      const zip = new JSZip();
-      const opts = Array.from(document.getElementById('invoiceSelect')
-                         .selectedOptions).map(o=>o.value);
-      const targets = opts.length ? opts : invoiceList;
+      const zip       = new JSZip();
+      const opts      = Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o => o.value);
+      const targets   = opts.length ? opts : invoiceList;
 
       for (const inv of targets) {
-        const group = parsedRows.filter(r=>String(r['Invoice']).trim()===inv);
+        const group = parsedRows.filter(r => String(r['Invoice']).trim() === inv);
         if (!group.length) continue;
 
-        const doc = new jsPDF({ unit, format:[w,h] });
+        const doc = new jsPDF({ unit, format: [w, h] });
         doc.setFontSize(10);
 
-        // ── inject uploaded font if available ──────────────────────────
+        // inject font
         if (customFontName && customFontData) {
           doc.addFileToVFS(customFontName, customFontData);
           doc.addFont(customFontName, 'CustomFont', 'normal');
           doc.setFont('CustomFont', 'normal');
         }
-        // ───────────────────────────────────────────────────────────────
 
-        doc.addImage(headerUrl,'PNG',0,0,w, w*(30/101.6));
-        doc.addImage(footerUrl,'PNG',0,h-(49*h/101.6),w, h*(49/101.6));
+        // draw header with preserved aspect ratio
+        const headerProps  = doc.getImageProperties(headerUrl);
+        const headerH      = w * (headerProps.height / headerProps.width);
+        doc.addImage(headerUrl, 'PNG', 0, 0, w, headerH);
 
-        let y = w*(30/101.6) + 11, left = 10;
-        doc.text(`Invoice #: ${inv}`, left, y); y+=7;
-        const name = titleCase(group[0]['First Name']+' '+group[0]['Last Name']);
-        doc.text(`Name: ${name}`, left, y); y+=7;
+        // draw footer with preserved aspect ratio
+        const footerProps  = doc.getImageProperties(footerUrl);
+        const footerH      = w * (footerProps.height / footerProps.width);
+        doc.addImage(footerUrl, 'PNG', 0, h - footerH, w, footerH);
 
-        let num = String(group[0]['Phone']).replace(/\D/g,'');
-        if(num.startsWith('880')) num=num.slice(3);
-        else if(num.startsWith('0')) num=num.slice(1);
-        if(num.length>10) num=num.slice(-10);
-        doc.text(`Phone: 0${num}`, left, y); y+=7;
+        // start text below header
+        let y = headerH + 11;
+        const left = 10;
 
-        const addr = `Address: ${titleCase(group[0]['Address'])}`;
-        const lines = doc.splitTextToSize(addr, w-left*2);
-        doc.text(lines, left, y); y += lines.length*7;
+        doc.text(`Invoice #: ${inv}`, left, y); y += 7;
+        const name = titleCase(group[0]['First Name'] + ' ' + group[0]['Last Name']);
+        doc.text(`Name: ${name}`, left, y); y += 7;
 
-        const notes = group.map(r=>r['NOTE']||'').join(' ').toLowerCase();
+        let num = String(group[0]['Phone']).replace(/\D/g, '');
+        if (num.startsWith('880')) num = num.slice(3);
+        else if (num.startsWith('0')) num = num.slice(1);
+        if (num.length > 10) num = num.slice(-10);
+        doc.text(`Phone: 0${num}`, left, y); y += 7;
+
+        const addrLines = doc.splitTextToSize(
+          `Address: ${titleCase(group[0]['Address'])}`, w - left * 2
+        );
+        doc.text(addrLines, left, y); y += addrLines.length * 7;
+
+        const notes = group.map(r => r['NOTE'] || '').join(' ').toLowerCase();
         const total = notes.includes('paid') ? '0' : String(Math.round(group[0]['Order Total Amount']));
-        doc.text(`Total: Tk ${total}`, left, y); y+=7;
+        doc.text(`Total: Tk ${total}`, left, y); y += 7;
 
-        doc.text('Items:', left, y); y+=7;
+        doc.text('Items:', left, y); y += 7;
         group.forEach(r => {
           const item = r['Items'] ? titleCase(r['Items']) : '';
           const qty  = r['Quantity'] ? ` (${r['Quantity']})` : '';
-          if(item) { doc.text(`- ${item}${qty}`, left, y); y+=7; }
+          if (item) { doc.text(`- ${item}${qty}`, left, y); y += 7; }
         });
 
         zip.file(`${inv}.pdf`, doc.output('blob'));
       }
 
-      const blob = await zip.generateAsync({type:'blob'});
+      const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, 'shipping_labels.zip');
     });
   </script>
