@@ -217,15 +217,14 @@
         const doc=new jsPDF({unit,format:[w,h]});
 
         // inject custom font if unlocked
-        if(customFontName && customFontData) {
+        if (customFontName && customFontData) {
+          // register font using filename as alias
           doc.addFileToVFS(customFontName, customFontData);
-          // derive alias from filename
-          const alias = customFontName.replace(/\.(ttf|otf)$/i,'');
-          doc.addFont(customFontName, alias, 'normal');
-          doc.setFont(alias, 'normal');
+          doc.addFont(customFontName, customFontName, 'normal');
+          doc.setFont(customFontName, 'normal');
         }
-
-        doc.setFontSize(10);
+        // set font size after setting custom font
+        doc.setFontSize(10);(10);
         // draw header
         const hp=doc.getImageProperties(headerUrl), hh=w*(hp.height/hp.width);
         doc.addImage(headerUrl,'PNG',0,0,w,hh);
