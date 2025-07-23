@@ -213,7 +213,7 @@
         doc.setFontSize(10);
         const hp=doc.getImageProperties(header), hh=w*(hp.height/hp.width); doc.addImage(header,'PNG',0,0,w,hh);
         const fp=doc.getImageProperties(footer), fh=w*(fp.height/fp.width); doc.addImage(footer,'PNG',0,h-fh,w,fh);
-        let y=hh+11,labelX=10,valueX=labelX+60;
+        let y=hh+11,labelX=10,valueX=labelX+18;
         doc.text('Invoice #:',labelX,y);doc.text(inv,valueX,y);y+=7;
         const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']); doc.text('Name:',labelX,y);doc.text(name,valueX,y);y+=7;
         let num=group[0]['Phone'].replace(/\D/g,''); if(num.startsWith('880'))num=num.slice(3);else if(num.startsWith('0'))num=num.slice(1);if(num.length>10)num=num.slice(-10);
