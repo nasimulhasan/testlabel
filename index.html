@@ -42,49 +42,41 @@
               <i class="bi bi-whatsapp fs-4"></i><span class="ms-2">Contact us</span>
             </a>
           </div>
-        </div>
 
-
-
-              <!-- How to get Unlock Code? accordion -->
-      <div class="accordion mb-4 w-25" id="unlockInfoAccordion">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingUnlockInfo">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseUnlockInfo"
-              aria-expanded="false"
-              aria-controls="collapseUnlockInfo"
-            >
-              How to get Unlock Code?
-            </button>
-          </h2>
-          <div
-            id="collapseUnlockInfo"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingUnlockInfo"
-            data-bs-parent="#unlockInfoAccordion"
-          >
-            <div class="accordion-body">
-              <p>
-                To obtain an unlock code, please visit our pricing page and complete
-                the purchase form. Once payment is confirmed, your code will be emailed
-                to you within minutes.
-              </p>
+          <!-- How to get Unlock Code? accordion (moved inside card-body) -->
+          <div class="accordion mt-4" id="unlockInfoAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingUnlockInfo">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseUnlockInfo"
+                  aria-expanded="false"
+                  aria-controls="collapseUnlockInfo"
+                >
+                  How to get Unlock Code?
+                </button>
+              </h2>
+              <div
+                id="collapseUnlockInfo"
+                class="accordion-collapse collapse"
+                aria-labelledby="headingUnlockInfo"
+                data-bs-parent="#unlockInfoAccordion"
+              >
+                <div class="accordion-body text-start">
+                  <p>
+                    To obtain an unlock code, please visit our pricing page and complete
+                    the purchase form. Once payment is confirmed, your code will be emailed
+                    to you within minutes.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
-
-
-
-
-        
-      </div>
-
-
 
       <!-- Generator Page (hidden until unlocked) -->
       <div id="generatorPage" class="hidden">
@@ -209,11 +201,14 @@
       try {
         const arr = await readBuffer(f);
         const wb = XLSX.read(arr, { type: 'array' });
-        let last={};
+        let last = {};
         parsedRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''})
-          .map(r=>{ ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount'].forEach(k=>r[k]=r[k]||last[k]||''); last={...r}; return r; });
+          .map(r => { ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount']
+            .forEach(k => r[k]=r[k]||last[k]||''); last={...r}; return r; });
         invoiceList = [...new Set(parsedRows.map(r=>r['Invoice'].trim()))];
-        const sel = document.getElementById('invoiceSelect'); sel.innerHTML=''; invoiceList.forEach(i=>sel.append(new Option(i,i)));
+        const sel = document.getElementById('invoiceSelect');
+        sel.innerHTML = '';
+        invoiceList.forEach(i=>sel.append(new Option(i,i)));
         document.getElementById('invoiceSelection').classList.remove('hidden');
       } catch {
         showAlert('Error parsing Excel','danger');
@@ -231,27 +226,61 @@
       if(!parsedRows.length) return showAlert('Upload and parse Excel first');
       const header = await readURL(headerF);
       const footer = await readURL(footerF);
-      let w,h,unit; const pr=document.getElementById('presetSize').value;
-      if(pr==='custom'){ w=+document.getElementById('paperWidth').value; h=+document.getElementById('paperHeight').value; unit=document.getElementById('paperUnit').value; if(unit==='in'){w*=25.4;h*=25.4;unit='mm';} if(unit==='pt'){w*=0.352778;h*=0.352778;unit='mm';} } else {[w,h,unit]=pr.split(','); w=+w; h=+h;}
-      const zip=new JSZip(), opts=Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value), targets=opts.length?opts:invoiceList;
+      let w,h,unit;
+      const pr = document.getElementById('presetSize').value;
+      if(pr==='custom'){
+        w=+document.getElementById('paperWidth').value;
+        h=+document.getElementById('paperHeight').value;
+        unit=document.getElementById('paperUnit').value;
+        if(unit==='in'){w*=25.4;h*=25.4;unit='mm';}
+        if(unit==='pt'){w*=0.352778;h*=0.352778;unit='mm';}
+      } else {
+        [w,h,unit]=pr.split(',');
+        w=+w; h=+h;
+      }
+      const zip=new JSZip(),
+            opts=Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value),
+            targets=opts.length?opts:invoiceList;
       for(const inv of targets){
-        const group=parsedRows.filter(r=>r['Invoice'].trim()===inv); if(!group.length) continue;
+        const group=parsedRows.filter(r=>r['Invoice'].trim()===inv);
+        if(!group.length) continue;
         const doc=new jsPDF({unit,format:[w,h]});
-        if(customFontName&&customFontData){ doc.addFileToVFS(customFontName,customFontData); doc.addFont(customFontName,customFontName,'normal'); doc.setFont(customFontName,'normal'); } else doc.setFont('helvetica','normal');
+        if(customFontName&&customFontData){
+          doc.addFileToVFS(customFontName,customFontData);
+          doc.addFont(customFontName,customFontName,'normal');
+          doc.setFont(customFontName,'normal');
+        } else {
+          doc.setFont('helvetica','normal');
+        }
         doc.setFontSize(10);
-        const hp=doc.getImageProperties(header), hh=w*(hp.height/hp.width); doc.addImage(header,'PNG',0,0,w,hh);
-        const fp=doc.getImageProperties(footer), fh=w*(fp.height/fp.width); doc.addImage(footer,'PNG',0,h-fh,w,fh);
+        const hp=doc.getImageProperties(header), hh=w*(hp.height/hp.width);
+        doc.addImage(header,'PNG',0,0,w,hh);
+        const fp=doc.getImageProperties(footer), fh=w*(fp.height/fp.width);
+        doc.addImage(footer,'PNG',0,h-fh,w,fh);
         let y=hh+11,labelX=10,valueX=labelX+18;
-        doc.text('Invoice #:',labelX,y);doc.text(inv,valueX,y);y+=7;
-        const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']); doc.text('Name:',labelX,y);doc.text(name,valueX,y);y+=7;
-        let num=group[0]['Phone'].replace(/\D/g,''); if(num.startsWith('880'))num=num.slice(3); else if(num.startsWith('0'))num=num.slice(1); if(num.length>10)num=num.slice(-10);
-        doc.text('Phone:',labelX,y);doc.text(num,valueX,y);y+=7;
-        const lines=doc.splitTextToSize(titleCase(group[0]['Address']),w-valueX-10); doc.text('Address:',labelX,y);doc.text(lines,valueX,y);y+=lines.length*7;
-        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase(), tot=notes.includes('paid')?'0':String(Math.round(group[0]['Order Total Amount'])); doc.text('Total:',labelX,y);doc.text(`Tk ${tot}`,valueX,y);y+=7;
-        doc.text('Items:',labelX,y);y+=7; group.forEach(r=>{const it=r['Items']?titleCase(r['Items']):'',q=r['Quantity']?` (${r['Quantity']})`:''; if(it){doc.text(`- ${it}${q}`,labelX+10,y);y+=7;}});
+        doc.text('Invoice #:',labelX,y); doc.text(inv,valueX,y); y+=7;
+        const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']);
+        doc.text('Name:',labelX,y); doc.text(name,valueX,y); y+=7;
+        let num=group[0]['Phone'].replace(/\D/g,'');
+        if(num.startsWith('880')) num=num.slice(3);
+        else if(num.startsWith('0')) num=num.slice(1);
+        if(num.length>10) num=num.slice(-10);
+        doc.text('Phone:',labelX,y); doc.text(num,valueX,y); y+=7;
+        const lines=doc.splitTextToSize(titleCase(group[0]['Address']),w-valueX-10);
+        doc.text('Address:',labelX,y); doc.text(lines,valueX,y); y+=lines.length*7;
+        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase(),
+              tot=notes.includes('paid')?'0':String(Math.round(group[0]['Order Total Amount']));
+        doc.text('Total:',labelX,y); doc.text(`Tk ${tot}`,valueX,y); y+=7;
+        doc.text('Items:',labelX,y); y+=7;
+        group.forEach(r=>{
+          const it=r['Items']?titleCase(r['Items']):'',
+                q=r['Quantity']?` (${r['Quantity']})`:'';
+          if(it){ doc.text(`- ${it}${q}`,labelX+10,y); y+=7; }
+        });
         zip.file(`${inv}.pdf`,doc.output('blob'));
       }
-      const blob=await zip.generateAsync({type:'blob'}); saveAs(blob,'shipping_labels.zip');
+      const blob=await zip.generateAsync({type:'blob'});
+      saveAs(blob,'shipping_labels.zip');
     });
   </script>
 </body>
