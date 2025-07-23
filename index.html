@@ -22,75 +22,113 @@
 <body>
   <div class="container d-flex justify-content-center">
     <div class="w-100" style="max-width: 600px;">
-      <div class="card shadow-sm mb-4">
-        <div class="card-body p-4">
-          <h1 class="card-title text-center mb-4">Custom Label Generator</h1>
-          <button type="button" class="btn btn-secondary mb-4 w-100" data-bs-toggle="modal" data-bs-target="#instructionsModal">
-            Instructions
-          </button>
-          <!-- Modal omitted for brevity -->
 
-          <div class="mb-3 row">
-            <label for="presetSize" class="col-sm-4 col-form-label">Paper Size</label>
-            <div class="col-sm-8">
-              <select id="presetSize" class="form-select">
-                <option value="101.6,152.4,mm">4×6 in</option>
-                <option value="152.4,101.6,mm">6×4 in</option>
-                <option value="210,297,mm">A4</option>
-                <option value="216,279,mm">Letter</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
+      <!-- Unlock Page -->
+      <div id="unlockPage" class="card shadow-sm mb-4">
+        <div class="card-body p-4 text-center">
+          <h1 class="card-title mb-4">Enter Unlock Code</h1>
+          <div class="mb-3">
+            <input type="text" id="unlockInput" class="form-control" placeholder="Enter unlock code">
           </div>
-          <div id="customSizeFields" class="mb-3 row d-none">
-            <div class="col-sm-4"><input id="paperWidth" class="form-control" placeholder="Width"></div>
-            <div class="col-sm-4"><input id="paperHeight" class="form-control" placeholder="Height"></div>
-            <div class="col-sm-4"><select id="paperUnit" class="form-select"><option>mm</option><option>in</option><option>pt</option></select></div>
-          </div>
-
-          <div class="mb-2">
-            <label>Unlock code:</label>
-            <div class="d-flex">
-              <input id="unlockInput" class="form-control me-2" placeholder="XXXX-XXXX">
-              <button id="unlockBtn" class="btn btn-outline-primary">Unlock</button>
-            </div>
-          </div>
-
-          <fieldset id="formFieldset" disabled>
-            <form id="labelForm">
-              <div class="mb-2">
-                <label>Upload Font</label>
-                <input type="file" id="fontInput" accept=".ttf,.otf" class="form-control">
-              </div>
-              <div class="mb-2">
-                <label>Header Image</label>
-                <input type="file" id="headerInput" accept="image/*" class="form-control">
-              </div>
-              <div class="mb-2">
-                <label>Footer Image</label>
-                <input type="file" id="footerInput" accept="image/*" class="form-control">
-              </div>
-              <div class="mb-2">
-                <label>Excel File</label>
-                <input type="file" id="excelInput" accept=".xls,.xlsx" class="form-control">
-              </div>
-              <div id="invoiceSelection" class="hidden">
-                <label>Select Invoices</label>
-                <select id="invoiceSelect" multiple size="8" class="form-select"></select>
-              </div>
-              <button id="generateBtn" class="btn btn-primary w-100">Generate Labels</button>
-            </form>
-          </fieldset>
-          <div id="alertPlaceholder" class="mt-3"></div>
+          <button id="unlockBtn" class="btn btn-primary w-100">Unlock</button>
+          <div id="unlockAlert" class="mt-3"></div>
         </div>
       </div>
 
-      <div class="accordion mb-4" id="coffeeAccordion">
-        <!-- Omitted -->
+      <!-- Generator Page (hidden until unlocked) -->
+      <div id="generatorPage" class="hidden">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h1 class="card-title text-center mb-4">Custom Label Generator</h1>
+
+            <!-- Instructions Button -->
+            <button type="button" class="btn btn-secondary mb-4 w-100" data-bs-toggle="modal" data-bs-target="#instructionsModal">
+              Instructions
+            </button>
+            <!-- Instructions Modal omitted for brevity -->
+
+            <!-- Paper size controls -->
+            <div class="mb-3 row">
+              <label for="presetSize" class="col-sm-4 col-form-label">Paper Size</label>
+              <div class="col-sm-8">
+                <select id="presetSize" class="form-select">
+                  <option value="101.6,152.4,mm">4×6 in (101.6×152.4 mm)</option>
+                  <option value="152.4,101.6,mm">6×4 in (152.4×101.6 mm)</option>
+                  <option value="210,297,mm">A4 (210×297 mm)</option>
+                  <option value="216,279,mm">Letter (216×279 mm)</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+            </div>
+            <div id="customSizeFields" class="mb-3 row d-none">
+              <div class="col-sm-4">
+                <label for="paperWidth" class="form-label">Width</label>
+                <input type="number" id="paperWidth" class="form-control" placeholder="Width">
+              </div>
+              <div class="col-sm-4">
+                <label for="paperHeight" class="form-label">Height</label>
+                <input type="number" id="paperHeight" class="form-control" placeholder="Height">
+              </div>
+              <div class="col-sm-4">
+                <label for="paperUnit" class="form-label">Unit</label>
+                <select id="paperUnit" class="form-select">
+                  <option value="mm" selected>mm</option>
+                  <option value="in">in</option>
+                  <option value="pt">pt</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Form Inputs -->
+            <form id="labelForm">
+              <div class="mb-2">
+                <label for="fontInput" class="form-label">Upload Font (optional)</label>
+                <input type="file" id="fontInput" class="form-control" accept=".ttf,.otf">
+              </div>
+              <div class="mb-2">
+                <label for="headerInput" class="form-label">Header Image</label>
+                <input type="file" id="headerInput" class="form-control" accept="image/*">
+              </div>
+              <div class="mb-2">
+                <label for="footerInput" class="form-label">Footer Image</label>
+                <input type="file" id="footerInput" class="form-control" accept="image/*">
+              </div>
+              <div class="mb-2">
+                <label for="excelInput" class="form-label">Excel File</label>
+                <input type="file" id="excelInput" class="form-control" accept=".xls,.xlsx">
+              </div>
+              <div id="invoiceSelection" class="mb-2 hidden">
+                <label for="invoiceSelect" class="form-label">Select Invoices</label>
+                <select id="invoiceSelect" class="form-select" multiple size="8"></select>
+              </div>
+              <button type="button" id="generateBtn" class="btn btn-primary w-100">Generate Labels</button>
+            </form>
+            <div id="alertPlaceholder" class="mt-3"></div>
+          </div>
+        </div>
+
+        <!-- Coffee Accordion -->
+        <div class="accordion mb-4" id="coffeeAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="coffeeHeading">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#coffeeCollapse" aria-expanded="false" aria-controls="coffeeCollapse">
+                Buy me a coffee
+              </button>
+            </h2>
+            <div id="coffeeCollapse" class="accordion-collapse collapse" aria-labelledby="coffeeHeading" data-bs-parent="#coffeeAccordion">
+              <div class="accordion-body text-center">
+                <p>If you enjoy this tool, consider buying me a coffee ☕️</p>
+                <img src="https://cdn.jsdelivr.net/gh/nasimulhasan/label2@master/qr.jpeg" alt="Buy me a coffee" class="img-fluid rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
+
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const { jsPDF } = window.jspdf;
@@ -98,93 +136,93 @@
     let customFontName, customFontData;
 
     // Helpers
-    const readURL = file => new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); });
-    const readBuffer = file => new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.readAsArrayBuffer(file); });
-    const titleCase = s=>s.toLowerCase().split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
-
-    document.getElementById('presetSize').addEventListener('change',e=>{
-      document.getElementById('customSizeFields').classList.toggle('d-none', e.target.value!=='custom');
+    const readURL = file => new Promise(res => {
+      const r = new FileReader(); r.onload = ()=>res(r.result); r.readAsDataURL(file);
     });
+    const readBuffer = file => new Promise(res => {
+      const r = new FileReader(); r.onload = ()=>res(r.result); r.readAsArrayBuffer(file);
+    });
+    const titleCase = s => s.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
 
+    // Unlock page logic
     async function checkUnlock(code) {
-      const res = await fetch('https://raw.githubusercontent.com/nasimulhasan/testlabel/main/keys.json');
-      const { validCodes } = await res.json();
+      const resp = await fetch('https://raw.githubusercontent.com/nasimulhasan/testlabel/main/keys.json');
+      const { validCodes } = await resp.json();
       return validCodes.includes(code);
     }
-    document.getElementById('unlockBtn').addEventListener('click', async ()=>{
+    document.getElementById('unlockBtn').addEventListener('click', async () => {
       try {
-        if (await checkUnlock(document.getElementById('unlockInput').value.trim())) {
-          document.getElementById('formFieldset').removeAttribute('disabled');
-          showAlert('Unlocked!', 'success');
-        } else showAlert('Invalid code', 'warning');
-      } catch { showAlert('Error verifying', 'danger'); }
+        const ok = await checkUnlock(document.getElementById('unlockInput').value.trim());
+        const alertContainer = document.getElementById('unlockAlert');
+        alertContainer.innerHTML = '';
+        if (ok) {
+          document.getElementById('unlockPage').classList.add('hidden');
+          document.getElementById('generatorPage').classList.remove('hidden');
+        } else {
+          alertContainer.innerHTML = '<div class="alert alert-warning">Invalid code</div>';
+        }
+      } catch {
+        document.getElementById('unlockAlert').innerHTML = '<div class="alert alert-danger">Error verifying code</div>';
+      }
     });
 
-    function showAlert(msg,type='danger'){
-      const d=document.createElement('div');
-      d.innerHTML=`<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
-      document.getElementById('alertPlaceholder').append(d);
-    }
-
-    document.getElementById('excelInput').addEventListener('change', async e=>{
-      const f=e.target.files[0]; if(!f) return;
+    // After unlocking, setup generator
+    document.getElementById('presetSize').addEventListener('change', e => {
+      document.getElementById('customSizeFields').classList.toggle('d-none', e.target.value !== 'custom');
+    });
+    document.getElementById('fontInput').addEventListener('change', async e => {
+      const f = e.target.files[0]; if (!f) return;
+      const url = await readURL(f);
+      customFontName = f.name;
+      customFontData = url.split(',')[1];
+    });
+    document.getElementById('excelInput').addEventListener('change', async e => {
+      const f = e.target.files[0]; if (!f) return;
       try {
-        const arr=await readBuffer(f);
-        const wb=XLSX.read(arr,{type:'array'});
-        let last={};
-        parsedRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''})
-          .map(r=>{['Invoice','First Name','Last Name','Phone','Address','Order Total Amount'].forEach(k=>r[k]=r[k]||last[k]||''); last={...r}; return r;});
-        invoiceList=[...new Set(parsedRows.map(r=>r['Invoice'].trim()))];
-        const sel=document.getElementById('invoiceSelect'); sel.innerHTML=''; invoiceList.forEach(i=>sel.append(new Option(i,i)));
+        const arr = await readBuffer(f);
+        const wb = XLSX.read(arr, { type: 'array' });
+        let last = {};
+        parsedRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''})
+          .map(r => { ['Invoice','First Name','Last Name','Phone','Address','Order Total Amount'].forEach(k=>r[k]=r[k]||last[k]||''); last={...r}; return r; });
+        invoiceList = [...new Set(parsedRows.map(r=>r['Invoice'].trim()))];
+        const sel = document.getElementById('invoiceSelect'); sel.innerHTML=''; invoiceList.forEach(i=>sel.append(new Option(i,i)));
         document.getElementById('invoiceSelection').classList.remove('hidden');
-      } catch(err){showAlert('Excel error','danger');}
+      } catch {
+        showAlert('Error parsing Excel', 'danger');
+      }
     });
-
-    document.getElementById('fontInput').addEventListener('change', async e=>{
-      const f=e.target.files[0]; if(!f) return;
-      const url=await readURL(f);
-      customFontName=f.name; customFontData=url.split(',')[1];
-    });
-
+    function showAlert(msg,type='danger'){
+      const div = document.createElement('div');
+      div.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+      document.getElementById('alertPlaceholder').append(div);
+    }
     document.getElementById('generateBtn').addEventListener('click', async ()=>{
-      const header=await readURL(document.getElementById('headerInput').files[0]);
-      const footer=await readURL(document.getElementById('footerInput').files[0]);
-      if(!header||!footer) return showAlert('Select header/footer','danger');
-      if(!parsedRows.length) return showAlert('Parse Excel first','danger');
-      let w,h,unit; const pr=document.getElementById('presetSize').value;
-      if(pr==='custom'){w=+document.getElementById('paperWidth').value; h=+document.getElementById('paperHeight').value; unit=document.getElementById('paperUnit').value; if(unit==='in'){w*=25.4;h*=25.4;unit='mm';} if(unit==='pt'){w*=0.352778;h*=0.352778;unit='mm';}} else {[w,h,unit]=pr.split(',');}
-      const zip=new JSZip(), opts=Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value), tg=opts.length?opts:invoiceList;
-      for(const inv of tg){
-        const group=parsedRows.filter(r=>r['Invoice'].trim()===inv);
-        if(!group.length) continue;
+      const header = await readURL(document.getElementById('headerInput').files[0]);
+      const footer = await readURL(document.getElementById('footerInput').files[0]);
+      if(!header||!footer) return showAlert('Select header and footer');
+      if(!parsedRows.length) return showAlert('Upload and parse Excel first');
+      let w,h,unit;
+      const pr = document.getElementById('presetSize').value;
+      if(pr==='custom'){ w=+document.getElementById('paperWidth').value; h=+document.getElementById('paperHeight').value; unit=document.getElementById('paperUnit').value; if(unit==='in'){w*=25.4;h*=25.4;unit='mm';} if(unit==='pt'){w*=0.352778;h*=0.352778;unit='mm';}} else {[w,h,unit]=pr.split(',');}
+      const zip = new JSZip();
+      const opts = Array.from(document.getElementById('invoiceSelect').selectedOptions).map(o=>o.value);
+      const targets = opts.length?opts:invoiceList;
+      for(const inv of targets){ const group=parsedRows.filter(r=>r['Invoice'].trim()===inv); if(!group.length) continue;
         const doc=new jsPDF({unit,format:[w,h]});
-        // custom font first
-        if(customFontName&&customFontData){
-          doc.addFileToVFS(customFontName,customFontData);
-          const alias=customFontName.split('.')[0];
-          doc.addFont(customFontName,alias,'normal');
-          doc.setFont(alias,'normal');
-        } else doc.setFont('helvetica','normal');
+        if(customFontName&&customFontData){ doc.addFileToVFS(customFontName,customFontData); doc.addFont(customFontName,customFontName,'normal'); doc.setFont(customFontName,'normal'); } else doc.setFont('helvetica','normal');
         doc.setFontSize(10);
-        const hp=doc.getImageProperties(header), hh=w*(hp.height/hp.width);
-        doc.addImage(header,'PNG',0,0,w,hh);
-        const fp=doc.getImageProperties(footer), fh=w*(fp.height/fp.width);
-        doc.addImage(footer,'PNG',0,h-fh,w,fh);
+        const hp=doc.getImageProperties(header), hh=w*(hp.height/hp.width); doc.addImage(header,'PNG',0,0,w,hh);
+        const fp=doc.getImageProperties(footer), fh=w*(fp.height/fp.width); doc.addImage(footer,'PNG',0,h-fh,w,fh);
         let y=hh+11,labelX=10,valueX=labelX+60;
         doc.text('Invoice #:',labelX,y);doc.text(inv,valueX,y);y+=7;
-        const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']);
-        doc.text('Name:',labelX,y);doc.text(name,valueX,y);y+=7;
+        const name=titleCase(group[0]['First Name']+' '+group[0]['Last Name']); doc.text('Name:',labelX,y);doc.text(name,valueX,y);y+=7;
         let num=group[0]['Phone'].replace(/\D/g,''); if(num.startsWith('880'))num=num.slice(3);else if(num.startsWith('0'))num=num.slice(1);if(num.length>10)num=num.slice(-10);
         doc.text('Phone:',labelX,y);doc.text(num,valueX,y);y+=7;
-        const lines=doc.splitTextToSize(titleCase(group[0]['Address']),w-valueX-10);
-        doc.text('Address:',labelX,y);doc.text(lines,valueX,y);y+=lines.length*7;
-        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase(), tot=notes.includes('paid')?'0':String(Math.round(group[0]['Order Total Amount']));
-        doc.text('Total:',labelX,y);doc.text(`Tk ${tot}`,valueX,y);y+=7;
-        doc.text('Items:',labelX,y);y+=7;
-        group.forEach(r=>{const it=r['Items']?titleCase(r['Items']):'',q=r['Quantity']?` (${r['Quantity']})`:'';if(it){doc.text(`- ${it}${q}`,labelX+10,y);y+=7;}});
-        zip.file(`${inv}.pdf`,doc.output('blob'));
-      }
-      const blob=await zip.generateAsync({type:'blob'});saveAs(blob,'shipping_labels.zip');
+        const lines=doc.splitTextToSize(titleCase(group[0]['Address']),w-valueX-10);doc.text('Address:',labelX,y);doc.text(lines,valueX,y);y+=lines.length*7;
+        const notes=group.map(r=>r['NOTE']||'').join(' ').toLowerCase(), tot=notes.includes('paid')?'0':String(Math.round(group[0]['Order Total Amount'])); doc.text('Total:',labelX,y);doc.text(`Tk ${tot}`,valueX,y);y+=7;
+        doc.text('Items:',labelX,y);y+=7; group.forEach(r=>{const it=r['Items']?titleCase(r['Items']):'',q=r['Quantity']?` (${r['Quantity']})`:''; if(it){doc.text(`- ${it}${q}`,labelX+10,y);y+=7;}});
+        zip.file(`${inv}.pdf`,doc.output('blob')); }
+      const blob=await zip.generateAsync({type:'blob'}); saveAs(blob,'shipping_labels.zip');
     });
   </script>
 </body>
